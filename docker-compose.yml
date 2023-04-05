@@ -1,0 +1,38 @@
+## env
+#
+# 
+# NODE_HOSTNAME
+# WEBSERVER_FQDN
+#
+version: '3'
+
+services:
+
+  web:
+    image: n8nio/n8n:latest
+    volumes:
+      - n8n-config:/home/node/.n8n
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == $NODE_HOSTNAME
+      labels:
+      - traefik.enable=true
+      - traefik.port=5678
+      - traefik.frontend.rule=Host:$WEBSERVER_FQDN
+      - traefik.protocol=http
+      - traefik.docker.network=web
+    networks:
+      - web
+
+volumes:
+  n8n-config:
+    driver: local
+
+  
+networks:
+  web:
+    external: 
+      name: web
